@@ -10,7 +10,7 @@ actual coordinate = (50, 0)
     d_b = c_b +l/2
 
 mapped coordinate = (48, 49)
-actual coordinate = (50, 0)
+actual coordinate = (50, 50)
 
 3)  d_l = c_l
     d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
@@ -92,7 +92,7 @@ actual coordinate = (5, 10)
 mapped coordinate = (0, 0)
 actual coordinate = (0, 0)
 
-4) d_l = sqrt(sq(l/2) + sq(b/2 +c_l))
+5) d_l = sqrt(sq(l/2) + sq(b/2 +c_l))
     d_b = c_b
     
 mapped coordinate = (8, 5)
