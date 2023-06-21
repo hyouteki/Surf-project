@@ -35,11 +35,6 @@ double degree_to_radian(int degree)
     return degree * pi / 180;
 }
 
-int sq(int num)
-{
-    return num * num;
-}
-
 // derived model parameters
 int c_l = l / (2 * sin(degree_to_radian(theta_l)));
 int c_b = b / (2 * sin(degree_to_radian(theta_b)));
@@ -49,7 +44,7 @@ void get_readings(int *d_l, int *d_b)
 {
     // for now it is hardcoded
     // *d_l = c_l + b;
-    // *d_b = sqrt(sq(c_b + l / 2) + sq(b / 2));
+    // *d_b = sqrt(sq((long)(c_b+l/2)) + sq((long)(b / 2)));
     *d_l = ultrasonic_l.MeasureInMillimeters();
     *d_b = ultrasonic_b.MeasureInMillimeters();
 }
@@ -64,7 +59,7 @@ void average_readings(int *d_l, int *d_b)
         get_readings(&reading_l, &reading_b);
         *d_l += reading_l;
         *d_b += reading_b;
-        sleep(delay_in_reading);
+        delay(delay_in_reading);
     }
     *d_l = *d_l / no_readings;
     *d_b = *d_b / no_readings;
@@ -73,9 +68,9 @@ void average_readings(int *d_l, int *d_b)
 bool is_reading_valid(int d_l, int d_b)
 {
     int d_l_min = c_l;
-    int d_l_max = sqrt(sq(c_l + b) + sq(l / 2));
+    int d_l_max = sqrt(sq((long)(c_l + b)) + sq((long)(l / 2)));
     int d_b_min = c_b;
-    int d_b_max = sqrt(sq(c_b + l) + sq(b / 2));
+    int d_b_max = sqrt(sq((long)(c_b + l)) + sq((long)(b / 2)));
     // printf("d_l_max = %d\n", d_l_max);
     // printf("d_b_max = %d\n", d_b_max);
     return d_l >= d_l_min && d_l <= d_l_max && d_b >= d_b_min && d_b <= d_b_max;
@@ -102,26 +97,26 @@ void setup() {
   Serial.begin(9600);
 }
 
+void print_coords(int alpha, int beta) {
+  String code = String(alpha)+","+String(beta)+",";
+  Serial.println(code);
+}
+
 void loop() {
     int d_l, d_b;
     average_readings(&d_l, &d_b);
-    // printf("c_l = %d mm\n", c_l);
-    // printf("c_b = %d mm\n", c_b);
-    // printf("d_l = %d mm\n", c_l);
-    // printf("d_b = %d mm\n", d_b);
+    // Serial.println("c_l = " + String(c_l)+"mm");
+    // Serial.println("c_b = " + String(c_b)+"mm");
+    // Serial.println("d_l = " + String(d_l)+"mm");
+    // Serial.println("d_b = " + String(d_b)+"mm");
     int valid = is_reading_valid(d_l, d_b);
-    // printf("valid reading :: %d\n", valid);
+    // Serial.println("valid_reading = " + String(valid));
     if (valid)
     {
         int alpha, beta;
         map_to_coords(d_l, d_b, &alpha, &beta);
         // printf("mapped coordinate = (%d, %d)\n", alpha, beta);
-        // printf("actual coordinate = (50, 0)\n");
-        Serial.print("(");
-        Serial.print(alpha);
-        Serial.print(", ");
-        Serial.print(beta);
-        Serial.println(")");
+        print_coords(alpha, beta);
     }
     return 0;
 }
