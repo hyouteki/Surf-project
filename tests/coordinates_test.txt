@@ -1,0 +1,99 @@
+for l=100, b=100
+    
+1)  d_l = c_l + b
+    d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
+
+mapped coordinate = (48, 0)
+actual coordinate = (50, 0) 
+
+2)  d_l = c_l + b/2
+    d_b = c_b +l/2
+
+mapped coordinate = (48, 49)
+actual coordinate = (50, 0)
+
+3)  d_l = c_l
+    d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
+
+mapped coordinate = (48, 99)
+actual coordinate = (50, 100)
+
+
+4)  d_l = sqrt(sq(l / 2) + sq(b+c_l))
+    d_b = sqrt(sq(c_b + l) + sq(b / 2))
+
+mapped coordinate = (0, 0)
+actual coordinate = (0, 0)
+
+5)  d_l = sqrt(sq(l/2) + sq(b/2 +c_l))
+    d_b = c_b
+    
+mapped coordinate = (98, 49)
+actual coordinate = (100, 50)
+
+
+for l= 50, b= 50
+    
+1)  d_l = c_l + b
+    d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
+
+mapped coordinate = (25, 0)
+actual coordinate = (25, 0) 
+
+2)  d_l = c_l + b/2
+    d_b = c_b +l/2
+
+mapped coordinate = (24, 24)
+actual coordinate = (25, 25)
+
+3)  d_l = c_l
+    d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
+
+mapped coordinate = (25, 49)
+actual coordinate = (25, 50)
+
+
+4)  d_l = sqrt(sq(l / 2) + sq(b+c_l))
+    d_b = sqrt(sq(c_b + l) + sq(b / 2))
+
+mapped coordinate = (0, 0)
+actual coordinate = (0, 0)
+
+5)  d_l = sqrt(sq(l/2) + sq(b/2 +c_l))
+    d_b = c_b
+    
+mapped coordinate = (49, 24)
+actual coordinate = (50,25)
+
+
+for l=10, b=10
+
+1) d_l = c_l + b
+    d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
+
+mapped coordinate = (3, 0)
+actual coordinate = (5, 0) 
+
+2)  d_l = c_l + b/2
+    d_b = c_b +l/2
+
+mapped coordinate = (3, 5)
+actual coordinate = (5, 5)
+
+3)  d_l = c_l
+    d_b = sqrt(sq(c_b + l / 2) + sq(b / 2))
+
+mapped coordinate = (3, 9)
+actual coordinate = (5, 10)
+
+4)  d_l = sqrt(sq(l / 2) + sq(b+c_l))
+    d_b = sqrt(sq(c_b + l) + sq(b / 2))
+
+mapped coordinate = (0, 0)
+actual coordinate = (0, 0)
+
+4) d_l = sqrt(sq(l/2) + sq(b/2 +c_l))
+    d_b = c_b
+    
+mapped coordinate = (8, 5)
+actual coordinate = (10,5) 
