@@ -11,10 +11,7 @@ LENGTH: int = 100
 BREADTH: int = 100
 DELAY_BETWEEN_READINGS: float = 0.2
 
-# constants realated to plotting
-PLOT_TITLE = "Spline interpolation"
-X_LABEL = "X (Length)"
-Y_LABEL = "Y (Breadth)"
+# constants related to plotting
 X_MIN = -10
 X_MAX = LENGTH+10
 Y_MIN = -10
