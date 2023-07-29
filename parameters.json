@@ -1,0 +1,32 @@
+{
+    "workspace": {
+        "length": 100,
+        "breadth": 100
+    },
+    "proximity sensor": {
+        "effectual angle": 15,
+        "minimum distance": 20,
+        "maximum distance": 3500
+    },
+    "scale": {
+        "length": 5,
+        "breadth": 5
+    },
+    "readings": {
+        "average of": 3,
+        "delay": 0.2
+    },
+    "spline interpolation": {
+        "maximum points": 5,
+        "minimum distance": 5,
+        "maximum distance": 30
+    },
+    "dbscan": {
+        "eps": 0.8,
+        "minimum samples": 8 
+    },
+    "serial": {
+        "port": "COM3",
+        "baud": 9600
+    }
+}
