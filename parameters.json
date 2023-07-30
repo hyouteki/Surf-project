@@ -17,13 +17,14 @@
         "delay": 0.2
     },
     "spline interpolation": {
-        "maximum points": 5,
+        "maximum points": 100,
         "minimum distance": 5,
         "maximum distance": 30
     },
     "dbscan": {
         "eps": 0.8,
-        "minimum samples": 8 
+        "minimum samples": 8,
+        "interval": 15
     },
     "serial": {
         "port": "COM3",

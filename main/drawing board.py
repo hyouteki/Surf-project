@@ -10,13 +10,6 @@ from csv import writer
 from sklearn.cluster import DBSCAN
 from pandas import read_csv
 
-"""
-units:
-    length = mm
-    angle  = degree
-    delay  = ms
-"""
-
 with open("parameters.json") as file:
     parameters = load(file)
 
@@ -52,8 +45,9 @@ SPLINE_MAXIMUM_DISTANCE: int = parameters["spline interpolation"]["maximum dista
 # constants for DBSCAN outlier detection algorithm
 EPS: float = parameters["dbscan"]["eps"]
 """radius of neighbourhood"""
-MIN_SAMPLES: int = parameters["dbscan"]["minimum samples"]
+MINIMUM_SAMPLES: int = parameters["dbscan"]["minimum samples"]
 """minimum numberr of samples required in neighbourhood to be a inlier"""
+INTERVAL: int = parameters["dbscan"]["interval"]
 
 # constants related to keyboard instructions
 CLEAR = "c"
@@ -66,6 +60,17 @@ IMPORT_FROM_CSV = "b"
 PORT = parameters["serial"]["port"]
 BAUD = parameters["serial"]["baud"]
 
+
+# helper methods
+degreeToRadian = lambda degree: degree * pi / 180
+sq = lambda n: n * n
+distanceBetweenPoints = lambda a1, b1, a2, b2: sqrt(sq(a1 - a2) + sq(b1 - b2))
+
+# derived model parameters
+COUNTER_TO_LENGTH: int = LENGTH / (2 * sin(degreeToRadian(THETA_LENGTH)))
+COUNTER_TO_BREADTH: int = BREADTH / (2 * sin(degreeToRadian(THETA_BREADTH)))
+
+
 # serial port initialization
 ser = Serial(
     port=PORT,
@@ -75,6 +80,8 @@ ser = Serial(
     bytesize=EIGHTBITS,
     timeout=0,
 )
+
+counter = 0
 
 a, b = 0, 0  # current points
 x, y = [], []  # regular points
@@ -91,15 +98,6 @@ fig.show()
 (interpolatedLine,) = axis.plot([], [], "bo")
 interpolate = False
 
-# helper methods
-degreeToRadian = lambda degree: degree * pi / 180
-sq = lambda n: n * n
-distanceBetweenPoints = lambda a1, b1, a2, b2: sqrt(sq(a1 - a2) + sq(b1 - b2))
-
-# derived model parameters
-COUNTER_TO_LENGTH: int = LENGTH / (2 * sin(degreeToRadian(THETA_LENGTH)))
-COUNTER_TO_BREADTH: int = BREADTH / (2 * sin(degreeToRadian(THETA_BREADTH)))
-
 
 def getSerialInput() -> str:
     """returns serial input without parsing"""
@@ -109,17 +107,20 @@ def getSerialInput() -> str:
     return tmp
 
 
-def isInputValid(tmp: str) -> bool:
-    """checks whether the input is valid not the coordinate"""
-    return sum([1 for z in tmp if z == ","]) == 2 and len(tmp) >= 4
-
-
 def decodeInput(tmp: str):
-    """decodes input and returns a 2d coordinate/point"""
+    """decodes input and returns a 2d point"""
     tmp = tmp[:-1]
     a: int = int(tmp[: tmp.index(",")])
     b: int = int(tmp[tmp.index(",") + 1 :])
     return (a, b)
+
+
+def isInputValid(tmp: str) -> bool:
+    """checks whether input is valid or not"""
+    return (
+        sum([1 for i in tmp.split(",") if i != ""]) == 2
+        and sum([1 for i in tmp if i == ","]) == 2
+    )
 
 
 def isReadingValid(dL: int, dB: int) -> bool:
@@ -129,6 +130,91 @@ def isReadingValid(dL: int, dB: int) -> bool:
     dBMin: int = COUNTER_TO_BREADTH
     dBMax: int = sqrt(sq(COUNTER_TO_BREADTH + LENGTH) + sq(BREADTH / 2))
     return dL >= dLMin and dL <= dLMax and dB >= dBMin and dB <= dBMax
+
+
+def mergeInterpolatedPoints() -> None:
+    """adding interpolated points to general points
+    and clearing interpolated and to_interpolate arrays"""
+    global x, y, xInterpolated, yInterpolated, xToInterpolate, yToInterpolate
+    x.extend(xInterpolated)
+    y.extend(yInterpolated)
+    xInterpolated, yInterpolated, xToInterpolate, yToInterpolate = [], [], [], []
+
+
+def plotTheDrawing() -> None:
+    """Function to plot the points"""
+    axis.plot(x, y, "bo")
+    axis.plot(xToInterpolate, yToInterpolate, "bo")
+    axis.plot(xInterpolated, yInterpolated, "r-")
+    fig.canvas.draw()
+
+
+def removeOutliers() -> None:
+    """removes outliers present in the plot using DBSCAN algorithm"""
+    print("OUTLIER DETECTION TRIGGERED")
+    global x, y
+    mergeInterpolatedPoints()
+    points = [[x[i], y[i]] for i in range(len(x))]
+    if points._len_() < MINIMUM_SAMPLES:
+        return
+    model = DBSCAN(eps=EPS, min_samples=MINIMUM_SAMPLES).fit(points)
+    inliers = [
+        points[record] for record in range(len(points)) if model.labels_[record] != -1
+    ]
+    x = [record[0] for record in inliers]
+    y = [record[1] for record in inliers]
+    axis.cla()
+    axis.set_xlim(X_MIN, X_MAX)
+    axis.set_ylim(Y_MIN, Y_MAX)
+    plotTheDrawing()
+
+
+def savePointsToCSV(fileName: str) -> None:
+    """saves points to CSV file with fileName"""
+    mergeInterpolatedPoints()
+    points = [[x[i], y[i]] for i in range(len(x))]
+    with open(fileName, "w") as file:
+        writer(file).writerows(points)
+
+
+def importCSVFileToPoints(fileName: str) -> None:
+    """imports points present in the CSV file"""
+    global x, y
+    mergeInterpolatedPoints()
+    points = read_csv(fileName, header=None, sep=",").iloc[:, 0:2].values
+    x = [record[0] for record in points]
+    y = [record[1] for record in points]
+    axis.cla()
+    axis.set_xlim(X_MIN, X_MAX)
+    axis.set_ylim(Y_MIN, Y_MAX)
+    plotTheDrawing()
+
+
+def checkForKeyPress():
+    global x, y, xToInterpolate, yToInterpolate, xInterpolated, yInterpolated, interpolate
+    if is_pressed(CLEAR):
+        print("clear")
+        x, y = [], []
+        xToInterpolate, yToInterpolate = [], []
+        xInterpolated, yInterpolated = [], []
+        axis.cla()
+        axis.set_xlim(X_MIN, X_MAX)
+        axis.set_ylim(Y_MIN, Y_MAX)
+        plotTheDrawing()
+    elif is_pressed(INTERPOLATE):
+        # interpolation is on or off until key pressed again
+        interpolate = not interpolate
+        print(f"Interpolate = {interpolate}")
+        if not interpolate:
+            mergeInterpolatedPoints()
+    elif is_pressed(OUTLIER_REMOVAL):
+        removeOutliers()
+    elif is_pressed(SAVE):
+        fileName: str = input("Enter save file name: ") + ".csv"
+        savePointsToCSV(fileName)
+    elif is_pressed(IMPORT_FROM_CSV):
+        fileName: str = input("Enter import file name: ") + ".csv"
+        importCSVFileToPoints(fileName)
 
 
 def mapToCoordinate(dL: int, dB: int):
@@ -150,32 +236,35 @@ def mapToCoordinate(dL: int, dB: int):
 
 def getCoordinate():
     validCoordinates: int = 0
-    a, b = 0, 0
+    m, n = 0, 0
     while validCoordinates < AVERAGE_OF_READINGS:
+        sleep(0.02)
+        checkForKeyPress()
         serialInput = getSerialInput()
         if not isInputValid(serialInput):
             continue
         # now we have a valid input
         dL, dB = decodeInput(serialInput)
+        # dL, dB = 243, 243
         if not isReadingValid(dL, dB):
             continue
         # now we have a valid reading
         p, q = mapToCoordinate(dL, dB)
-        a += p
-        b += q
+        m += p
+        n += q
         validCoordinates += 1
-    return (a // AVERAGE_OF_READINGS, b // AVERAGE_OF_READINGS)
+    return (m // AVERAGE_OF_READINGS, n // AVERAGE_OF_READINGS)
 
 
-def update_interpolation() -> None:
+def updateInterpolation() -> None:
     global xInterpolated, yInterpolated
     if interpolate and len(xToInterpolate) > 2:
-        # if distance is less than min distance then return
+        """if distance is less than min distance then return"""
         dis = distanceBetweenPoints(
-            xToInterpolate[-1],
-            yToInterpolate[-1],
-            xToInterpolate[-2],
-            yToInterpolate[-2],
+            xToInterpolate[0],
+            yToInterpolate[0],
+            xToInterpolate[1],
+            yToInterpolate[1],
         )
         if dis < SPLINE_MINIMUM_DISTANCE and dis > SPLINE_MAXIMUM_DISTANCE:
             return
@@ -209,7 +298,7 @@ def drawInterpolation() -> None:
     for t in tmp:
         xToInterpolate.append(t[0])
         yToInterpolate.append(t[1])
-    update_interpolation()
+    updateInterpolation()
     plotTheDrawing()
 
 
@@ -221,85 +310,18 @@ def drawPoint() -> None:
     plotTheDrawing()
 
 
-def plotTheDrawing() -> None:
-    """function to plot the points"""
-    axis.plot(x, y, "bo")
-    axis.plot(xToInterpolate, yToInterpolate, "bo")
-    axis.plot(xInterpolated, yInterpolated, "r-")
-    fig.canvas.draw()
-
-
-def mergeInterpolatedPoints() -> None:
-    """adding interpolated points to general points and clearing interpolated and toInterpolate arrays"""
-    global x, y, xInterpolated, yInterpolated, xToInterpolate, yToInterpolate
-    x.extend(xInterpolated)
-    y.extend(yInterpolated)
-    xInterpolated, yInterpolated, xToInterpolate, yToInterpolate = [], [], [], []
-
-
-def removeOutliers() -> None:
-    """Removes outliers present in the plot using DBSCAN algorithm"""
-    global x, y, interpolate
-    mergeInterpolatedPoints()
-    interpolate = False
-    points = [[x[i], y[i]] for i in range(len(x))]
-    model = DBSCAN(eps=EPS, min_samples=MIN_SAMPLES).fit(points)
-    inliers = [
-        points[record] for record in range(len(points)) if model.labels_[record] != -1
-    ]
-    x = [record[0] for record in inliers]
-    y = [record[1] for record in inliers]
-
-
-def savePointsToCSV(fileName: str) -> None:
-    """saves coordinates/points to CSV file with fileName"""
-    global interpolate
-    mergeInterpolatedPoints()
-    interpolate = False
-    points = [[x[i], y[i]] for i in range(len(x))]
-    with open(fileName, "w") as file:
-        writer(file).writerows(points)
-
-
-def importCSVFileToPoints(fileName: str) -> None:
-    """imports coordinates/points present in the CSV file"""
-    global x, y, interpolate
-    mergeInterpolatedPoints()
-    interpolate = False
-    points = read_csv(fileName, header=None, sep=",").iloc[:, 0:2].values
-    x = [record[0] for record in points]
-    y = [record[1] for record in points]
-
-
-if __name__ == "__main__":
-    while True:
-        if is_pressed(CLEAR):
-            print("clear")
-            x, y = [], []
-            xToInterpolate, yToInterpolate = [], []
-            xInterpolated, yInterpolated = [], []
-            axis.cla()
-            axis.set_xlim(X_MIN, X_MAX)
-            axis.set_ylim(Y_MIN, Y_MAX)
-        if is_pressed(INTERPOLATE):
-            # interpolation is on or off until key pressed again
-            interpolate = not interpolate
-            print(f"Interpolate = {interpolate}")
-            if not interpolate:
-                mergeInterpolatedPoints()
-        if is_pressed(OUTLIER_REMOVAL):
-            removeOutliers()
-        if is_pressed(SAVE):
-            fileName: str = input("Enter save file name: ") + ".csv"
-            savePointsToCSV(fileName)
-        if is_pressed(IMPORT_FROM_CSV):
-            fileName: str = input("Enter import file name: ") + ".csv"
-            importCSVFileToPoints(fileName)
-        a, b = getCoordinate()
-        print(a, b)
-        if interpolate:
-            drawInterpolation()
-        else:
-            drawPoint()
-        sleep(DELAY_BETWEEN_READINGS)
-        pause(0.001)
+# driver code
+while True:
+    checkForKeyPress()
+    if counter != 0 and counter % INTERVAL == 0:
+        removeOutliers()
+    a, b = getCoordinate()
+    # a, b = 50, 50
+    print(a, b)
+    counter += 1
+    if interpolate:
+        drawInterpolation()
+    else:
+        drawPoint()
+    # sleep(DELAY_BETWEEN_READINGS)
+    pause(0.001)
