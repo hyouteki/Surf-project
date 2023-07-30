@@ -10,6 +10,13 @@ from csv import writer
 from sklearn.cluster import DBSCAN
 from pandas import read_csv
 
+"""
+units:
+    length = mm
+    angle  = degree
+    delay  = ms
+"""
+
 with open("parameters.json") as file:
     parameters = load(file)
 
@@ -133,8 +140,7 @@ def isReadingValid(dL: int, dB: int) -> bool:
 
 
 def mergeInterpolatedPoints() -> None:
-    """adding interpolated points to general points
-    and clearing interpolated and to_interpolate arrays"""
+    """adding interpolated points to general points and clearing interpolated and to_interpolate arrays"""
     global x, y, xInterpolated, yInterpolated, xToInterpolate, yToInterpolate
     x.extend(xInterpolated)
     y.extend(yInterpolated)

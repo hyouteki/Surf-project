@@ -22,9 +22,9 @@
         "maximum distance": 30
     },
     "dbscan": {
-        "eps": 0.8,
-        "minimum samples": 8,
-        "interval": 15
+        "eps": 5,
+        "minimum samples": 3,
+        "interval": 10
     },
     "serial": {
         "port": "COM3",

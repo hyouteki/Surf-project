@@ -46,6 +46,5 @@ void loop()
   int d_l, d_b;
   get_readings(&d_l, &d_b);
   print_coords(d_l, d_b);
-  delay(200);
   return 0;
 }
