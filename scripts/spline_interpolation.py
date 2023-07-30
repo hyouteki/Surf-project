@@ -2,78 +2,67 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splprep, splev
 
-x = []
-y = []
+x, y = [], []  # regular points are stored here
+# interpolated points are stored in this
+xInterpolated, yInterpolated = [], []
 
-x_interp = []
-y_interp = []
+figure, axis = plt.subplots()
 
-fig, ax = plt.subplots()
-
-interp_line, = ax.plot([], [], 'b-', label='Interpolated Points')
+(interpolatedLine,) = axis.plot([], [], "b-", label="Interpolated Points")
 
 
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
+def draw() -> None:
+    axis.set_xlabel("X")
+    axis.set_ylabel("Y")
+    axis.set_title("Spline Interpolation")
+    axis.legend()
+    axis.set_xlim(0, 10)
+    axis.set_ylim(0, 10)
 
-ax.set_title('Spline Interpolation')
-
-ax.legend()
 
 interpolate = True
 
-ax.set_xlim(0, 10)
-ax.set_ylim(0, 10)
-
 
 def update_interpolation():
-    global x_interp, y_interp
-    
+    global xInterpolated, yInterpolated
+
     if interpolate and len(x) > 2:
-    # condition based on differences in the readings is to be put, to check if to interpolate(set interpolate=True) or not(set interpolate=False)
+        """condition based on differences in the readings
+        is to be put, to check if to interpolate(set
+        interpolate=True) or not(set interpolate=False)"""
 
-        if len(x) >= 3:  # to check if the number of data points is sufficient for cubic spline interpolation (k=3)
-            x_arr = np.array(x, dtype=np.float64)
-            y_arr = np.array(y, dtype=np.float64)
-            tck, u = splprep([x_arr, y_arr], k=2, s=0)
-            x_interp, y_interp = splev(np.linspace(0, 1, 100), tck)
+        """ to check if the number of data points is 
+        sufficient for cubic spline interpolation (k=3)"""
+        if len(x) >= 3:
+            xNPArray = np.array(x, dtype=np.float64)
+            yNPArray = np.array(y, dtype=np.float64)
+            tck, _ = splprep([xNPArray, yNPArray], k=2, s=0)
+            xInterpolated, yInterpolated = splev(np.linspace(0, 1, 100), tck)
         else:
-            x_interp = []
-            y_interp = []
+            xInterpolated = []
+            yInterpolated = []
     else:
-        x_interp = []
-        y_interp = []
+        xInterpolated = []
+        yInterpolated = []
+        interpolatedLine.set_data(xInterpolated, yInterpolated)
 
-
-        interp_line.set_data(x_interp, y_interp)
 
 def onclick(event):
-    global x_interp, y_interp
+    global xInterpolated, yInterpolated
     if event.button == 1:
-        
         x.append(event.xdata)
         y.append(event.ydata)
 
         update_interpolation()
 
-        ax.cla()  
+        axis.cla()
+        axis.plot(x, y, "bo", label="Discrete Points")
+        axis.plot(xInterpolated, yInterpolated, "b-", label="Interpolated Points")
+        draw()
+        figure.canvas.draw()
 
-        ax.plot(x, y, 'bo', label='Discrete Points')
-        ax.plot(x_interp, y_interp, 'b-', label='Interpolated Points')  
 
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        
-        ax.set_title('Spline Interpolation')
+figure.canvas.mpl_connect("button_press_event", onclick)
 
-        ax.set_xlim(0, 10)
-        ax.set_ylim(0, 10)
-
-        ax.legend()
-
-        fig.canvas.draw()
-
-fig.canvas.mpl_connect('button_press_event', onclick)
-
+draw()
 plt.show()
-
