@@ -5,4 +5,4 @@ Empowering Creative Expression with a Customizable Distance Sensor Kit: A Versat
 - [Mapping code test results](https://github.com/Hyouteki/Surf-project/blob/main/tests/coordinates_test.txt)
 - [Fusion models](https://github.com/Hyouteki/Surf-project/blob/main/models)
 - [CHANGELOG](https://github.com/Hyouteki/Surf-project/blob/main/CHANGELOG.md)
-- [Check blog on this project with extensive documentation](https://hyouteki.github.io/me/blogs/capturing-motion-using-ultrasonic-sensors/)
+- [Check out blog on this project with extensive documentation](https://hyouteki.github.io/me/blogs/capturing-motion-using-ultrasonic-sensors/)
