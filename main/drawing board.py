@@ -56,12 +56,15 @@ MINIMUM_SAMPLES: int = parameters["dbscan"]["minimum samples"]
 """minimum numberr of samples required in neighbourhood to be a inlier"""
 INTERVAL: int = parameters["dbscan"]["interval"]
 
+THRESHOLD: float = parameters["threshold"]
+
 # constants related to keyboard instructions
 CLEAR = "c"
 INTERPOLATE = "i"
 OUTLIER_REMOVAL = "o"
 SAVE = "s"
 IMPORT_FROM_CSV = "b"
+BREAK_OUTLIER_DETECTION = "f"
 
 # constants related to serial communication
 PORT = parameters["serial"]["port"]
@@ -104,7 +107,7 @@ fig.show()
 
 (interpolatedLine,) = axis.plot([], [], "bo")
 interpolate = False
-
+outlier_detection = True
 
 def getSerialInput() -> str:
     """returns serial input without parsing"""
@@ -161,7 +164,7 @@ def removeOutliers() -> None:
     global x, y
     mergeInterpolatedPoints()
     points = [[x[i], y[i]] for i in range(len(x))]
-    if points._len_() < MINIMUM_SAMPLES:
+    if len(points) < MINIMUM_SAMPLES:
         return
     model = DBSCAN(eps=EPS, min_samples=MINIMUM_SAMPLES).fit(points)
     inliers = [
@@ -197,7 +200,8 @@ def importCSVFileToPoints(fileName: str) -> None:
 
 
 def checkForKeyPress():
-    global x, y, xToInterpolate, yToInterpolate, xInterpolated, yInterpolated, interpolate
+    global x, y, xToInterpolate, yToInterpolate, xInterpolated, yInterpolated
+    global interpolate, outlier_detection
     if is_pressed(CLEAR):
         print("clear")
         x, y = [], []
@@ -210,10 +214,20 @@ def checkForKeyPress():
     elif is_pressed(INTERPOLATE):
         # interpolation is on or off until key pressed again
         interpolate = not interpolate
-        print(f"Interpolate = {interpolate}")
-        if not interpolate:
+        if (interpolate):
+            print("INTERPOLATION ACTIVATED")
+        else:
+            print("INTERPOLATION DEACTIVATED")
             mergeInterpolatedPoints()
     elif is_pressed(OUTLIER_REMOVAL):
+        outlier_detection = not outlier_detection
+        if (interpolate):
+            print("INTERPOLATION ACTIVATED")
+        else:
+            print("INTERPOLATION DEACTIVATED")
+            mergeInterpolatedPoints()
+        outlier_detection = True
+        print("OUTLIER DETECTION ACTIVATED")
         removeOutliers()
     elif is_pressed(SAVE):
         fileName: str = input("Enter save file name: ") + ".csv"
@@ -221,6 +235,9 @@ def checkForKeyPress():
     elif is_pressed(IMPORT_FROM_CSV):
         fileName: str = input("Enter import file name: ") + ".csv"
         importCSVFileToPoints(fileName)
+    elif is_pressed(BREAK_OUTLIER_DETECTION):
+        outlier_detection = False
+        print("OUTLIER DETECTION DEACTIVATED")
 
 
 def mapToCoordinate(dL: int, dB: int):
@@ -319,15 +336,22 @@ def drawPoint() -> None:
 # driver code
 while True:
     checkForKeyPress()
-    if counter != 0 and counter % INTERVAL == 0:
+    if counter != 0 and counter % INTERVAL == 0 and outlier_detection:
         removeOutliers()
     a, b = getCoordinate()
-    # a, b = 50, 50
     print(a, b)
+    flag = False
+    for i in range(len(xToInterpolate)):
+        m = xToInterpolate[i]
+        n = yToInterpolate[i]
+        if (distanceBetweenPoints(a, b, m, n) < THRESHOLD):
+            flag = True
+            break
+    if flag:
+        continue
     counter += 1
     if interpolate:
         drawInterpolation()
     else:
         drawPoint()
-    # sleep(DELAY_BETWEEN_READINGS)
     pause(0.001)

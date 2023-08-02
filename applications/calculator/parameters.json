@@ -8,27 +8,12 @@
         "minimum distance": 20,
         "maximum distance": 3500
     },
-    "scale": {
-        "length": 5,
-        "breadth": 5
-    },
     "readings": {
         "average of": 3,
         "delay": 0.2
     },
-    "spline interpolation": {
-        "maximum points": 100,
-        "minimum distance": 5,
-        "maximum distance": 30
-    },
-    "dbscan": {
-        "eps": 5,
-        "minimum samples": 3,
-        "interval": 10
-    },
     "serial": {
         "port": "COM3",
         "baud": 9600
-    },
-    "threshold": 8
+    }
 }
