@@ -1,5 +1,5 @@
-## Calculator application
-### Key layout
+# Calculator application
+## Key layout
 | AC | C | B | * |
 | -  | - | - | - |
 | 7  | 6 | 9 | / |
@@ -8,5 +8,4 @@
 | (  | 0 | ) | = |
 > Maps the physical input to digital
 
-### Credits for maths parsing logic
-https://github.com/gnebehay/parser.git
+### [Credits for maths parsing logic](https://github.com/gnebehay/parser.git)
