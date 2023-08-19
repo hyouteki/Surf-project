@@ -2,7 +2,7 @@ from math import sqrt, pi, sin
 from serial import Serial, PARITY_NONE, STOPBITS_ONE, EIGHTBITS
 from json import load
 from time import sleep
-from os import system
+from termcolor import colored
 
 """
 units:
@@ -163,14 +163,14 @@ def addToCalculator(a, b):
     global expression
     char = mapToTile(a, b)
     if char == "~":
-        print("Wrong coordinates!")
+        print(colored("Wrong coordinates!", "red"))
     elif char == "AC":
         expression = ""
     elif char == "C":
         if len(expression) > 0:
             expression = expression[:-1]
     elif char == "=":
-        system(f"python compute.py {expression}")
+        print(colored(f"RES: {eval(expression)}", "green"))
         expression = ""
     else:
         expression += char
@@ -179,9 +179,13 @@ def addToCalculator(a, b):
 # driver code
 while True:
     a, b = getCoordinate()
+    a -= LENGTH_BUFFER/2
+    b -= BREADTH_BUFFER/2
+    if a < 0 or b < 0:
+        print(colored("Wrong coordinates!", "red"))
     if skip > 0:
         skip -= 1
         continue
-    print(f"EXPR: {expression}")
     addToCalculator(a, b)
+    print(colored(f"EXPR: {expression}", "blue"))
     skip = SKIP_COUNT

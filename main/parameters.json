@@ -1,7 +1,7 @@
 {
     "workspace": {
-        "length": 100,
-        "breadth": 100
+        "length": 160,
+        "breadth": 200
     },
     "proximity sensor": {
         "effectual angle": 15,
