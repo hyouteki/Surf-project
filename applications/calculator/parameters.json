@@ -1,7 +1,9 @@
 {
     "workspace": {
-        "length": 100,
-        "breadth": 100
+        "length": 160,
+        "breadth": 200,
+        "length buffer": 40,
+        "breadth buffer": 50
     },
     "proximity sensor": {
         "effectual angle": 15,

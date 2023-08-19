@@ -348,7 +348,7 @@ while True:
             flag = True
             break
     if flag:
-        continue
+        continue2
     counter += 1
     if interpolate:
         drawInterpolation()

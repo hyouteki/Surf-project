@@ -25,6 +25,8 @@ MAXIMUM_DISTANCE: int = parameters["proximity sensor"]["maximum distance"]
 # model parameters
 LENGTH: int = parameters["workspace"]["length"]
 BREADTH: int = parameters["workspace"]["breadth"]
+LENGTH_BUFFER: int = parameters["workspace"]["length buffer"]
+BREADTH_BUFFER: int = parameters["workspace"]["breadth buffer"]
 THETA_LENGTH: int = EFFECTUAL_ANGLE
 THETA_BREADTH: int = EFFECTUAL_ANGLE
 AVERAGE_OF_READINGS: int = parameters["readings"]["average of"]
@@ -34,6 +36,7 @@ DELAY_BETWEEN_READINGS: int = parameters["readings"]["delay"]
 PORT = parameters["serial"]["port"]
 BAUD = parameters["serial"]["baud"]
 
+SKIP_COUNT = 3
 
 # helper methods
 degreeToRadian = lambda degree: degree * pi / 180
@@ -56,6 +59,7 @@ ser = Serial(
 )
 
 expression = ""
+skip = SKIP_COUNT
 
 
 def getSerialInput() -> str:
@@ -64,6 +68,9 @@ def getSerialInput() -> str:
     tmp = tmp.replace(b"\n", b"").replace(b"\r", b"")
     tmp = tmp.decode("utf")
     return tmp
+    """
+    return "450,450,"
+    """
 
 
 def decodeInput(tmp: str):
@@ -84,10 +91,16 @@ def isInputValid(tmp: str) -> bool:
 
 def isReadingValid(dL: int, dB: int) -> bool:
     """check whether the provided distances are valid or not in accordance with specified parameters"""
-    dLMin: int = COUNTER_TO_LENGTH
-    dLMax: int = sqrt(sq(COUNTER_TO_LENGTH + BREADTH) + sq(LENGTH / 2))
-    dBMin: int = COUNTER_TO_BREADTH
-    dBMax: int = sqrt(sq(COUNTER_TO_BREADTH + LENGTH) + sq(BREADTH / 2))
+    dLMin: int = COUNTER_TO_LENGTH + BREADTH_BUFFER / 2
+    dLMax: int = sqrt(
+        sq(COUNTER_TO_LENGTH + BREADTH - BREADTH_BUFFER / 2)
+        + sq(LENGTH / 2 - LENGTH_BUFFER / 2)
+    )
+    dBMin: int = COUNTER_TO_BREADTH + LENGTH_BUFFER / 2
+    dBMax: int = sqrt(
+        sq(COUNTER_TO_BREADTH + LENGTH - LENGTH_BUFFER / 2)
+        + sq(BREADTH / 2 - BREADTH_BUFFER / 2)
+    )
     return dL >= dLMin and dL <= dLMax and dB >= dBMin and dB <= dBMax
 
 
@@ -166,4 +179,9 @@ def addToCalculator(a, b):
 # driver code
 while True:
     a, b = getCoordinate()
+    if skip > 0:
+        skip -= 1
+        continue
+    print(expression)
     addToCalculator(a, b)
+    skip = SKIP_COUNT
