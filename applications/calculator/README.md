@@ -2,8 +2,8 @@
 ## Key layout
 | AC | C | B | * |
 | -  | - | - | - |
-| 7  | 6 | 9 | / |
-| 4  | 3 | 6 | - |
+| 7  | 8 | 9 | / |
+| 4  | 5 | 6 | - |
 | 1  | 2 | 3 | + |
 | (  | 0 | ) | = |
 > Maps the physical input to digital
