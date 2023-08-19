@@ -1,6 +1,6 @@
 # Calculator application
 ## Key layout
-| AC | C | % | * |
+| AC | C | mod | * |
 | -  | - | - | - |
 | 7  | 8 | 9 | / |
 | 4  | 5 | 6 | - |
