@@ -1,5 +1,9 @@
-# Surf-project
-Empowering Creative Expression with a Customizable Distance Sensor Kit: A Versatile Tool for Interactive Experiences of end-users.
+![Banner image](https://github.com/Hyouteki/Surf-project/blob/main/assets/surf_project_banner_image.png)
+
+[![License][license-shield]][license-url]
+
+[license-shield]: https://img.shields.io/github/license/hyouteki/Surf-project.svg?style=for-the-badge
+[license-url]: https://github.com/hyouteki/Surf-project/blob/master/LICENSE.md
 
 ## Contents
 - [Main(Python and Arduino) code](https://github.com/Hyouteki/Surf-project/tree/main/main)
