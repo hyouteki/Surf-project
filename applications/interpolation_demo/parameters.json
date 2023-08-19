@@ -1,0 +1,22 @@
+{
+    "workspace": {
+        "length": 160,
+        "breadth": 200,
+        "length buffer": 40,
+        "breadth buffer": 50
+    },
+    "proximity sensor": {
+        "effectual angle": 15,
+        "minimum distance": 20,
+        "maximum distance": 3500
+    },
+    "readings": {
+        "average of": 3,
+        "delay": 0.2,
+        "skip count": 3
+    },
+    "serial": {
+        "port": "COM3",
+        "baud": 9600
+    }
+}

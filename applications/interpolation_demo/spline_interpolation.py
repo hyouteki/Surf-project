@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splprep, splev
+from math import sqrt, pi, sin
+from serial import Serial, PARITY_NONE, STOPBITS_ONE, EIGHTBITS
+from json import load
+from time import sleep
 
 x, y = [], []  # regular points are stored here
 # interpolated points are stored in this

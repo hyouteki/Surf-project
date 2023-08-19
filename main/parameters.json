@@ -24,7 +24,7 @@
     "dbscan": {
         "eps": 5,
         "minimum samples": 3,
-        "interval": 10
+        "interval": 15
     },
     "serial": {
         "port": "COM3",
