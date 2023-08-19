@@ -12,7 +12,8 @@
     },
     "readings": {
         "average of": 3,
-        "delay": 0.2
+        "delay": 0.2,
+        "skip count": 3
     },
     "serial": {
         "port": "COM3",

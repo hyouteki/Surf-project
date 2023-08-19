@@ -31,12 +31,11 @@ THETA_LENGTH: int = EFFECTUAL_ANGLE
 THETA_BREADTH: int = EFFECTUAL_ANGLE
 AVERAGE_OF_READINGS: int = parameters["readings"]["average of"]
 DELAY_BETWEEN_READINGS: int = parameters["readings"]["delay"]
+SKIP_COUNT: int = parameters["readings"]["skip count"]
 
 # constants related to serial communication
 PORT = parameters["serial"]["port"]
 BAUD = parameters["serial"]["baud"]
-
-SKIP_COUNT = 3
 
 # helper methods
 degreeToRadian = lambda degree: degree * pi / 180
