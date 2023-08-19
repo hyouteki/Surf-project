@@ -35,7 +35,7 @@ SCALE_BREADTH: int = parameters["scale"]["breadth"]
 AVERAGE_OF_READINGS: int = parameters["readings"]["average of"]
 DELAY_BETWEEN_READINGS: int = parameters["readings"]["delay"]
 
-# constants realated to plotting
+# constants related to plotting
 X_MIN = -10
 X_MAX = LENGTH + 10
 Y_MIN = -10
