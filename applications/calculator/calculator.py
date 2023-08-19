@@ -171,6 +171,7 @@ def addToCalculator(a, b):
             expression = expression[:-1]
     elif char == "=":
         system(f"python compute.py {expression}")
+        expression = ""
     else:
         expression += char
 
@@ -181,6 +182,6 @@ while True:
     if skip > 0:
         skip -= 1
         continue
-    print(expression)
+    print(f"EXPR: {expression}")
     addToCalculator(a, b)
     skip = SKIP_COUNT

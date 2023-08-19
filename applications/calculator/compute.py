@@ -23,4 +23,4 @@ def compute(node):
 if __name__ == '__main__':
     ast = parser.parse(sys.argv[1])
     result = compute(ast)
-    print(result)
+    print(f"RES: {result}")
