@@ -130,7 +130,6 @@ def getCoordinate():
     while validCoordinates < AVERAGE_OF_READINGS:
         sleep(0.02)
         serialInput = getSerialInput()
-        print(f"serial: {serialInput}")
         if not isInputValid(serialInput):
             continue
         # now we have a valid input
@@ -205,7 +204,6 @@ def onclick(event):
 # driver code
 while True:
     a, b = getCoordinate()
-    print(a, b)
     a -= LENGTH_BUFFER/2
     b -= BREADTH_BUFFER/2
     if a < 0 or b < 0:

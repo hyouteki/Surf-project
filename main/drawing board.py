@@ -9,6 +9,7 @@ from time import sleep
 from csv import writer
 from sklearn.cluster import DBSCAN
 from pandas import read_csv
+from termcolor import colored
 
 """
 units:
@@ -28,18 +29,22 @@ MAXIMUM_DISTANCE: int = parameters["proximity sensor"]["maximum distance"]
 # model parameters
 LENGTH: int = parameters["workspace"]["length"]
 BREADTH: int = parameters["workspace"]["breadth"]
+LENGTH_BUFFER: int = parameters["workspace"]["length buffer"]
+BREADTH_BUFFER: int = parameters["workspace"]["breadth buffer"]
 THETA_LENGTH: int = EFFECTUAL_ANGLE
 THETA_BREADTH: int = EFFECTUAL_ANGLE
 SCALE_LENGTH: int = parameters["scale"]["length"]
 SCALE_BREADTH: int = parameters["scale"]["breadth"]
+
 AVERAGE_OF_READINGS: int = parameters["readings"]["average of"]
 DELAY_BETWEEN_READINGS: int = parameters["readings"]["delay"]
+SKIP_COUNT: int = parameters["readings"]["skip count"]
 
 # constants related to plotting
-X_MIN = -10
-X_MAX = LENGTH + 10
-Y_MIN = -10
-Y_MAX = BREADTH + 10
+X_MIN = 0
+X_MAX = LENGTH - LENGTH_BUFFER
+Y_MIN = 0
+Y_MAX = BREADTH - BREADTH_BUFFER
 
 # constants related to spine interpolation
 SPLINE_MAXIMUM_POINTS: int = parameters["spline interpolation"]["maximum points"]
@@ -60,7 +65,8 @@ THRESHOLD: float = parameters["threshold"]
 
 # constants related to keyboard instructions
 CLEAR = "c"
-INTERPOLATE = "i"
+INTERPOLATION_ACTIVATED = "i"
+INTERPOLATION_DEACTIVATED = "a"
 OUTLIER_REMOVAL = "o"
 SAVE = "s"
 IMPORT_FROM_CSV = "b"
@@ -108,6 +114,7 @@ fig.show()
 (interpolatedLine,) = axis.plot([], [], "bo")
 interpolate = False
 outlier_detection = True
+skip = SKIP_COUNT
 
 def getSerialInput() -> str:
     """returns serial input without parsing"""
@@ -135,10 +142,16 @@ def isInputValid(tmp: str) -> bool:
 
 def isReadingValid(dL: int, dB: int) -> bool:
     """check whether the provided distances are valid or not in accordance with specified parameters"""
-    dLMin: int = COUNTER_TO_LENGTH
-    dLMax: int = sqrt(sq(COUNTER_TO_LENGTH + BREADTH) + sq(LENGTH / 2))
-    dBMin: int = COUNTER_TO_BREADTH
-    dBMax: int = sqrt(sq(COUNTER_TO_BREADTH + LENGTH) + sq(BREADTH / 2))
+    dLMin: int = COUNTER_TO_LENGTH + BREADTH_BUFFER / 2
+    dLMax: int = sqrt(
+        sq(COUNTER_TO_LENGTH + BREADTH - BREADTH_BUFFER / 2)
+        + sq(LENGTH / 2 - LENGTH_BUFFER / 2)
+    )
+    dBMin: int = COUNTER_TO_BREADTH + LENGTH_BUFFER / 2
+    dBMax: int = sqrt(
+        sq(COUNTER_TO_BREADTH + LENGTH - LENGTH_BUFFER / 2)
+        + sq(BREADTH / 2 - BREADTH_BUFFER / 2)
+    )
     return dL >= dLMin and dL <= dLMax and dB >= dBMin and dB <= dBMax
 
 
@@ -152,17 +165,20 @@ def mergeInterpolatedPoints() -> None:
 
 def plotTheDrawing() -> None:
     """Function to plot the points"""
+    axis.cla()
     axis.plot(x, y, "bo")
     axis.plot(xToInterpolate, yToInterpolate, "bo")
-    axis.plot(xInterpolated, yInterpolated, "r-")
+    axis.plot(xInterpolated, yInterpolated, "b-")
+    axis.set_xlim(X_MIN, X_MAX)
+    axis.set_ylim(Y_MIN, Y_MAX)
     fig.canvas.draw()
 
 
 def removeOutliers() -> None:
     """removes outliers present in the plot using DBSCAN algorithm"""
-    print("OUTLIER DETECTION TRIGGERED")
+    print(colored("OUTLIER DETECTION TRIGGERED", "green"))
     global x, y
-    mergeInterpolatedPoints()
+    # mergeInterpolatedPoints()
     points = [[x[i], y[i]] for i in range(len(x))]
     if len(points) < MINIMUM_SAMPLES:
         return
@@ -172,9 +188,6 @@ def removeOutliers() -> None:
     ]
     x = [record[0] for record in inliers]
     y = [record[1] for record in inliers]
-    axis.cla()
-    axis.set_xlim(X_MIN, X_MAX)
-    axis.set_ylim(Y_MIN, Y_MAX)
     plotTheDrawing()
 
 
@@ -193,9 +206,6 @@ def importCSVFileToPoints(fileName: str) -> None:
     points = read_csv(fileName, header=None, sep=",").iloc[:, 0:2].values
     x = [record[0] for record in points]
     y = [record[1] for record in points]
-    axis.cla()
-    axis.set_xlim(X_MIN, X_MAX)
-    axis.set_ylim(Y_MIN, Y_MAX)
     plotTheDrawing()
 
 
@@ -203,41 +213,31 @@ def checkForKeyPress():
     global x, y, xToInterpolate, yToInterpolate, xInterpolated, yInterpolated
     global interpolate, outlier_detection
     if is_pressed(CLEAR):
-        print("clear")
+        print(colored("CLEAR", "green"))
         x, y = [], []
         xToInterpolate, yToInterpolate = [], []
         xInterpolated, yInterpolated = [], []
-        axis.cla()
-        axis.set_xlim(X_MIN, X_MAX)
-        axis.set_ylim(Y_MIN, Y_MAX)
         plotTheDrawing()
-    elif is_pressed(INTERPOLATE):
-        # interpolation is on or off until key pressed again
-        interpolate = not interpolate
-        if (interpolate):
-            print("INTERPOLATION ACTIVATED")
-        else:
-            print("INTERPOLATION DEACTIVATED")
-            mergeInterpolatedPoints()
-    elif is_pressed(OUTLIER_REMOVAL):
-        outlier_detection = not outlier_detection
-        if (interpolate):
-            print("INTERPOLATION ACTIVATED")
-        else:
-            print("INTERPOLATION DEACTIVATED")
-            mergeInterpolatedPoints()
+    elif is_pressed(INTERPOLATION_ACTIVATED) and not interpolate:
+        interpolate = True
+        print(colored("INTERPOLATION ACTIVATED", "green"))
+    elif is_pressed(INTERPOLATION_DEACTIVATED) and interpolate:
+        interpolate = False
+        print(colored("INTERPOLATION DEACTIVATED", "green"))
+        mergeInterpolatedPoints()
+    elif is_pressed(OUTLIER_REMOVAL) and not outlier_detection:
         outlier_detection = True
-        print("OUTLIER DETECTION ACTIVATED")
+        print(colored("OUTLIER DETECTION ACTIVATED", "green"))
         removeOutliers()
     elif is_pressed(SAVE):
-        fileName: str = input("Enter save file name: ") + ".csv"
+        fileName: str = input(colored("Enter save file name: ", "purple")) + ".csv"
         savePointsToCSV(fileName)
     elif is_pressed(IMPORT_FROM_CSV):
-        fileName: str = input("Enter import file name: ") + ".csv"
+        fileName: str = input(colored("Enter import file name: ", "purple")) + ".csv"
         importCSVFileToPoints(fileName)
-    elif is_pressed(BREAK_OUTLIER_DETECTION):
+    elif is_pressed(BREAK_OUTLIER_DETECTION) and outlier_detection:
         outlier_detection = False
-        print("OUTLIER DETECTION DEACTIVATED")
+        print(colored("OUTLIER DETECTION DEACTIVATED", "green"))
 
 
 def mapToCoordinate(dL: int, dB: int):
@@ -282,45 +282,23 @@ def getCoordinate():
 def updateInterpolation() -> None:
     global xInterpolated, yInterpolated
     if interpolate and len(xToInterpolate) > 2:
-        """if distance is less than min distance then return"""
-        dis = distanceBetweenPoints(
-            xToInterpolate[0],
-            yToInterpolate[0],
-            xToInterpolate[1],
-            yToInterpolate[1],
+        xNpArray = array(xToInterpolate, dtype=float64)
+        yNpArray = array(yToInterpolate, dtype=float64)
+        tck, _ = splprep([xNpArray, yNpArray], k=2, s=0)
+        xInterpolated, yInterpolated = splev(
+            linspace(0, 1, SPLINE_MAXIMUM_POINTS), tck
         )
-        if dis < SPLINE_MINIMUM_DISTANCE and dis > SPLINE_MAXIMUM_DISTANCE:
-            return
-        # to check if the number of data points is sufficient for cubic spline interpolation (k=3)
-        if len(xToInterpolate) >= 3:
-            xNpArray = array(xToInterpolate, dtype=float64)
-            yNpArray = array(yToInterpolate, dtype=float64)
-            tck, _ = splprep([xNpArray, yNpArray], k=2, s=0)
-            xInterpolated, yInterpolated = splev(
-                linspace(0, 1, SPLINE_MAXIMUM_POINTS), tck
-            )
-        else:
-            xInterpolated = []
-            yInterpolated = []
     else:
         xInterpolated = []
         yInterpolated = []
         interpolatedLine.set_data(xInterpolated, yInterpolated)
 
-
 def drawInterpolation() -> None:
     global xToInterpolate, yToInterpolate
     # appending new points to the coordinates
-    xToInterpolate.append(a)
-    yToInterpolate.append(b)
-    # removing duplicate points
-    tmp = set(
-        [(xToInterpolate[i], yToInterpolate[i]) for i in range(len(xToInterpolate))]
-    )
-    xToInterpolate, yToInterpolate = [], []
-    for t in tmp:
-        xToInterpolate.append(t[0])
-        yToInterpolate.append(t[1])
+    if (a, b) not in set([(xToInterpolate[i], yToInterpolate[i]) for i in range(len(xToInterpolate))]):
+        xToInterpolate.append(a)
+        yToInterpolate.append(b)
     updateInterpolation()
     plotTheDrawing()
 
@@ -339,19 +317,19 @@ while True:
     if counter != 0 and counter % INTERVAL == 0 and outlier_detection:
         removeOutliers()
     a, b = getCoordinate()
-    print(a, b)
-    flag = False
-    for i in range(len(xToInterpolate)):
-        m = xToInterpolate[i]
-        n = yToInterpolate[i]
-        if (distanceBetweenPoints(a, b, m, n) < THRESHOLD):
-            flag = True
-            break
-    if flag:
-        continue2
-    counter += 1
+    a -= LENGTH_BUFFER/2
+    b -= BREADTH_BUFFER/2
+    if a < 0 or b < 0:
+        print(colored("Error: Wrong coordinates!", "red"))
     if interpolate:
+        if skip > 0:
+            skip -= 1
+            continue
         drawInterpolation()
+        skip = SKIP_COUNT
     else:
         drawPoint()
+
+    counter += 1
+    print(colored(f"Point: ({a}, {b})", "blue"))
     pause(0.001)

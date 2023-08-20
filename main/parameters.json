@@ -1,7 +1,9 @@
 {
     "workspace": {
         "length": 160,
-        "breadth": 200
+        "breadth": 200,
+        "length buffer": 40,
+        "breadth buffer": 50
     },
     "proximity sensor": {
         "effectual angle": 15,
@@ -14,7 +16,8 @@
     },
     "readings": {
         "average of": 3,
-        "delay": 0.2
+        "delay": 0.2,
+        "skip count": 3
     },
     "spline interpolation": {
         "maximum points": 100,
