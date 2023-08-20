@@ -8,7 +8,7 @@
 | (  | 0 | )   | = |
 
 > Maps the physical input to digital<br>
-> **P.S.** : This is a CLI
+> **P.S.** : This is a CLI application
 
 ## Quick start
 - Install some required python libraries
@@ -21,3 +21,4 @@
   ``` console
   python calculator.py
   ```
+  > **IMPORTANT**: This will not work if Arduino code is not running in parallel.
