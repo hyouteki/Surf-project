@@ -2,7 +2,7 @@ from math import sqrt, pi, sin
 from serial import Serial, PARITY_NONE, STOPBITS_ONE, EIGHTBITS
 from json import load
 from numpy import array, linspace, float64
-from matplotlib.pyplot import pause, figure
+from matplotlib.pyplot import pause, figure, ion
 from scipy.interpolate import splprep, splev
 from keyboard import is_pressed
 from time import sleep
@@ -49,10 +49,6 @@ Y_MAX = BREADTH - BREADTH_BUFFER
 # constants related to spine interpolation
 SPLINE_MAXIMUM_POINTS: int = parameters["spline interpolation"]["maximum points"]
 """number of maximum points in a linear curve"""
-SPLINE_MINIMUM_DISTANCE: int = parameters["spline interpolation"]["minimum distance"]
-"""minimum distance to interpolate two points"""
-SPLINE_MAXIMUM_DISTANCE: int = parameters["spline interpolation"]["maximum distance"]
-"""maximum distance to interpolate two points"""
 
 # constants for DBSCAN outlier detection algorithm
 EPS: float = parameters["dbscan"]["eps"]
@@ -71,6 +67,7 @@ OUTLIER_REMOVAL = "o"
 SAVE = "s"
 IMPORT_FROM_CSV = "b"
 BREAK_OUTLIER_DETECTION = "f"
+BACK = "z"
 
 # constants related to serial communication
 PORT = parameters["serial"]["port"]
@@ -105,6 +102,7 @@ x, y = [], []  # regular points
 xToInterpolate, yToInterpolate = [], []
 xInterpolated, yInterpolated = [], []  # interpolated points
 
+ion()
 fig = figure()
 axis = fig.add_subplot(111)
 axis.set_xlim(X_MIN, X_MAX)
@@ -238,7 +236,15 @@ def checkForKeyPress():
     elif is_pressed(BREAK_OUTLIER_DETECTION) and outlier_detection:
         outlier_detection = False
         print(colored("OUTLIER DETECTION DEACTIVATED", "green"))
-
+    elif is_pressed(BACK):
+        if not interpolate and len(x) > 0:
+            x = x[:-1]
+            y = y[:-1]
+        if interpolate and len(xToInterpolate) > 0:
+            xToInterpolate = xToInterpolate[:-1]
+            yToInterpolate = yToInterpolate[:-1]
+            updateInterpolation()
+        plotTheDrawing()
 
 def mapToCoordinate(dL: int, dB: int):
     """maps the provided distances to a interger coordinate/point in the first quadrant of the cartesian plane"""
@@ -321,15 +327,17 @@ while True:
     b -= BREADTH_BUFFER/2
     if a < 0 or b < 0:
         print(colored("Error: Wrong coordinates!", "red"))
+
+    plotTheDrawing()
+    if skip > 0:
+        skip -= 1
+        continue
     if interpolate:
-        if skip > 0:
-            skip -= 1
-            continue
         drawInterpolation()
-        skip = SKIP_COUNT
     else:
         drawPoint()
+    skip = SKIP_COUNT
 
     counter += 1
     print(colored(f"Point: ({a}, {b})", "blue"))
-    pause(0.001)
+    pause(0.05)

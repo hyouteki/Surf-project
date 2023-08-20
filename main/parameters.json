@@ -20,9 +20,7 @@
         "skip count": 3
     },
     "spline interpolation": {
-        "maximum points": 100,
-        "minimum distance": 5,
-        "maximum distance": 30
+        "maximum points": 100
     },
     "dbscan": {
         "eps": 5,
