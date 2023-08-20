@@ -24,3 +24,8 @@
 [piano-url]: https://github.com/Hyouteki/Surf-project/tree/main/applications/piano
 [interpolation-shield]: https://img.shields.io/badge/Interpolation%20demo-red?style=for-the-badge
 [interpolation-url]: https://github.com/Hyouteki/Surf-project/tree/main/applications/interpolation_demo
+
+## Highlights
+<img src="https://github.com/Hyouteki/Surf-project/blob/main/assets/smiley.png" width="1200"/>
+<img src="https://github.com/Hyouteki/Surf-project/blob/main/assets/interpolation_demo.png" width="1200"/>
+<img src="https://github.com/Hyouteki/Surf-project/blob/main/assets/blob.png" width="1200"/>
